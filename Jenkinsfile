@@ -1,11 +1,23 @@
 pipeline {
-    agent any
+    agent {
+        docker {
+            image 'python:3.10-slim'
+            args '-v /var/run/docker.sock:/var/run/docker.sock'
+        }
+    }
 
     environment {
         DOCKER_IMAGE = "srgunjal/python-ci-jenkins-demo"
     }
 
     stages {
+
+        stage('Install Dependencies') {
+            steps {
+                sh 'pip install --upgrade pip'
+                sh 'pip install -r requirements.txt'
+            }
+        }
 
         stage('Run Tests') {
             steps { sh 'scripts/run_tests.sh' }
