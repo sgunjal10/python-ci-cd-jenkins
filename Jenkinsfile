@@ -7,10 +7,6 @@ pipeline {
 
     stages {
 
-        stage('Checkout') {
-            steps { git 'https://github.com/sgunjal10/python-ci-cd-jenkins.git' }
-        }
-
         stage('Run Tests') {
             steps { sh 'scripts/run_tests.sh' }
         }
