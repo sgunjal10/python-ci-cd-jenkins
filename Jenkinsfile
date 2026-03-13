@@ -1,33 +1,28 @@
 pipeline {
-    agent {
-        dockerContainer {
-            image 'python:3.10-slim'
-            dockerHost '-v /var/run/docker.sock:/var/run/docker.sock'  // Access host Docker
-        }
-    }
+    agent any
 
     environment {
         DOCKER_IMAGE = "srgunjal/python-ci-jenkins-demo"
     }
 
     stages {
-        stage('Install Dependencies') {
-            steps {
-                sh 'pip install --upgrade pip'
-                sh 'pip install -r requirements.txt'
-            }
-        }
 
         stage('Run Tests') {
             steps {
-                sh 'scripts/run_tests.sh'
+                sh '''
+                docker run --rm -v $PWD:/app -w /app python:3.10-slim bash -c "
+                    pip install --upgrade pip &&
+                    pip install -r requirements.txt &&
+                    pytest tests/
+                "
+                '''
             }
         }
 
         stage('Build Docker Image') {
             steps {
                 sh '''
-                docker build -t $DOCKER_IMAGE:${BUILD_NUMBER:-latest} -f docker/Dockerfile .
+                docker build -t $DOCKER_IMAGE:${BUILD_NUMBER:-latest} ./docker
                 docker tag $DOCKER_IMAGE:${BUILD_NUMBER:-latest} $DOCKER_IMAGE:latest
                 '''
             }

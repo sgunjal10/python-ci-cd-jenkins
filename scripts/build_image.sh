@@ -1,7 +1,8 @@
 #!/bin/bash
 set -e
 
-IMAGE_NAME="srgunjal/python-ci-demo"
+# Docker image name from Jenkins environment
+IMAGE_NAME="${DOCKER_IMAGE:-srgunjal/python-ci-demo}"
 TAG=${BUILD_NUMBER:-latest}
 
 echo "Building Docker image..."
