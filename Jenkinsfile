@@ -1,31 +1,35 @@
 pipeline {
-    agent any
+    agent {
+        docker {
+            image 'python:3.10-slim'
+            args '-v /var/run/docker.sock:/var/run/docker.sock'  // Access host Docker
+        }
+    }
 
     environment {
         DOCKER_IMAGE = "srgunjal/python-ci-jenkins-demo"
     }
 
     stages {
-
-        stage('Run Tests in Python Container') {
-            agent {
-                dockerContainer {
-                    image 'python:3.10-slim'
-                    // No 'args' needed here; container only runs tests
-                }
-            }
+        stage('Install Dependencies') {
             steps {
-                // Install Python dependencies and run tests
                 sh 'pip install --upgrade pip'
                 sh 'pip install -r requirements.txt'
+            }
+        }
+
+        stage('Run Tests') {
+            steps {
                 sh 'scripts/run_tests.sh'
             }
         }
 
         stage('Build Docker Image') {
             steps {
-                // Use host Docker directly to build images
-                sh 'scripts/build_image.sh'
+                sh '''
+                docker build -t $DOCKER_IMAGE:${BUILD_NUMBER:-latest} -f docker/Dockerfile .
+                docker tag $DOCKER_IMAGE:${BUILD_NUMBER:-latest} $DOCKER_IMAGE:latest
+                '''
             }
         }
 
