@@ -2,7 +2,7 @@ pipeline {
     agent {
         dockerContainer {
             image 'python:3.10-slim'
-            args '-v /var/run/docker.sock:/var/run/docker.sock'  // Access host Docker
+            dockerHost '-v /var/run/docker.sock:/var/run/docker.sock'  // Access host Docker
         }
     }
 
